@@ -1,220 +1,239 @@
 {
-  "clientes": [
-    {
-      "idCliente": 1,
-      "nombre": "Cliente 1",
-      "direccion": "Dirección 1",
-      "telefono": "123-456-7890"
-    },
-    {
-      "idCliente": 2,
-      "nombre": "Cliente 2",
-      "direccion": "Dirección 2",
-      "telefono": "987-654-3210"
-    },
-    {
-      "idCliente": 3,
-      "nombre": "Cliente 3",
-      "direccion": "Dirección 3",
-      "telefono": "555-555-5555"
-    },
-    {
-      "idCliente": 4,
-      "nombre": "Cliente 4",
-      "direccion": "Dirección 4",
-      "telefono": "111-222-3333"
-    },
-    {
-      "idCliente": 5,
-      "nombre": "Cliente 5",
-      "direccion": "Dirección 5",
-      "telefono": "999-999-9999"
-    }
-  ],
-  "productos": [
-    {
-      "idProducto": 1,
-      "nombre": "Producto 1",
-      "descripcion": "Descripción del Producto 1",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 5,
-        "costoMateriales": 10,
-        "costosAdicionales": 2
-      }
-    },
-    {
-      "idProducto": 2,
-      "nombre": "Producto 2",
-      "descripcion": "Descripción del Producto 2",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 6,
-        "costoMateriales": 12,
-        "costosAdicionales": 3
-      }
-    },
-    {
-      "idProducto": 3,
-      "nombre": "Producto 3",
-      "descripcion": "Descripción del Producto 3",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 4,
-        "costoMateriales": 8,
-        "costosAdicionales": 1
-      }
-    },
-    {
-      "idProducto": 4,
-      "nombre": "Producto 4",
-      "descripcion": "Descripción del Producto 4",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 7,
-        "costoMateriales": 14,
-        "costosAdicionales": 2
-      }
-    },
-    {
-      "idProducto": 5,
-      "nombre": "Producto 5",
-      "descripcion": "Descripción del Producto 5",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 4,
-        "costoMateriales": 9,
-        "costosAdicionales": 2
-      }
-    },
-    {
-      "idProducto": 6,
-      "nombre": "Producto 6",
-      "descripcion": "Descripción del Producto 6",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 6,
-        "costoMateriales": 11,
-        "costosAdicionales": 3
-      }
-    },
-    {
-      "idProducto": 7,
-      "nombre": "Producto 7",
-      "descripcion": "Descripción del Producto 7",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 5,
-        "costoMateriales": 10,
-        "costosAdicionales": 2
-      }
-    },
-    {
-      "idProducto": 8,
-      "nombre": "Producto 8",
-      "descripcion": "Descripción del Producto 8",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 7,
-        "costoMateriales": 13,
-        "costosAdicionales": 3
-      }
-    },
-    {
-      "idProducto": 9,
-      "nombre": "Producto 9",
-      "descripcion": "Descripción del Producto 9",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 4,
-        "costoMateriales": 8,
-        "costosAdicionales": 2
-      }
-    },
-    {
-      "idProducto": 10,
-      "nombre": "Producto 10",
-      "descripcion": "Descripción del Producto 10",
-      "unidadMedida": "unidad",
-      "costoProduccion": {
-        "costoManoObra": 6,
-        "costoMateriales": 12,
-        "costosAdicionales": 3
-      }
-    }
-  ],
-  "ventas": [
-    {
-      "idCliente": 1,
-      "productos": [
-        {
-          "idProducto": 1,
-          "cantidad": 2
-        },
-        {
-          "idProducto": 3,
-          "cantidad": 1
-        }
-      ],
-      "totalProduccion": 19,
-      "total": 35
-    },
-    {
-      "idCliente": 3,
-      "productos": [
-        {
-          "idProducto": 2,
-          "cantidad": 3
-        },
-        {
-          "idProducto": 4,
-          "cantidad": 2
-        }
-      ],
-      "totalProduccion": 59,
-      "total": 106
-    },
-    {
-      "idCliente": 2,
-      "productos": [
-        {
-          "idProducto": 5,
-          "cantidad": 4
-        }
-      ],
-      "totalProduccion": 42,
-      "total": 78
-    },
-    {
-      "idCliente": 4,
-      "productos": [
-        {
-          "idProducto": 7,
-          "cantidad": 3
-        },
-        {
-          "idProducto": 10,
-          "cantidad": 1
-        }
-      ],
-      "totalProduccion": 43,
-      "total": 81
-    },
-    {
-      "idCliente": 5,
-      "productos": [
-        {
-          "idProducto": 6,
-          "cantidad": 2
-        },
-        {
-          "idProducto": 8,
-          "cantidad": 2
-        }
-      ],
-      "totalProduccion": 42,
-      "total": 79
-    }
-  ]
+	"customers": [
+		{
+			"customerID": 1,
+			"name": "Customer 1",
+			"address": "Address 1",
+			"phone": "123-456-7890"
+		},
+		{
+			"customerID": 2,
+			"name": "Customer 2",
+			"address": "Address 2",
+			"phone": "987-654-3210"
+		},
+		{
+			"customerID": 3,
+			"name": "Customer 3",
+			"address": "Address 3",
+			"phone": "555-555-5555"
+		},
+		{
+			"customerID": 4,
+			"name": "Customer 4",
+			"address": "Address 4",
+			"phone": "111-222-3333"
+		},
+		{
+			"customerID": 5,
+			"name": "Customer 5",
+			"address": "Address 5",
+			"phone": "999-999-9999"
+		}
+	],
+	"products": [
+		{
+			"productID": 1,
+			"name": "Product 1",
+			"description": "Description of Product 1",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 5,
+				"materialCost": 10,
+				"additionalCosts": 2,
+				"total": 17
+			},
+			"price": 25.5
+		},
+		{
+			"productID": 2,
+			"name": "Product 2",
+			"description": "Description of Product 2",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 6,
+				"materialCost": 12,
+				"additionalCosts": 3,
+				"total": 21
+			},
+			"price": 31.5
+		},
+		{
+			"productID": 3,
+			"name": "Product 3",
+			"description": "Description of Product 3",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 4,
+				"materialCost": 8,
+				"additionalCosts": 1,
+				"total": 13
+			},
+			"price": 19.5
+		},
+		{
+			"productID": 4,
+			"name": "Product 4",
+			"description": "Description of Product 4",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 7,
+				"materialCost": 14,
+				"additionalCosts": 2,
+				"total": 23
+			},
+			"price": 34.5
+		},
+		{
+			"productID": 5,
+			"name": "Product 5",
+			"description": "Description of Product 5",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 4,
+				"materialCost": 9,
+				"additionalCosts": 2,
+				"total": 15
+			},
+			"price": 22.5
+		},
+		{
+			"productID": 6,
+			"name": "Product 6",
+			"description": "Description of Product 6",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 6,
+				"materialCost": 11,
+				"additionalCosts": 3,
+				"total": 20
+			},
+			"price": 30.0
+		},
+		{
+			"productID": 7,
+			"name": "Product 7",
+			"description": "Description of Product 7",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 5,
+				"materialCost": 10,
+				"additionalCosts": 2,
+				"total": 17
+			},
+			"price": 25.5
+		},
+		{
+			"productID": 8,
+			"name": "Product 8",
+			"description": "Description of Product 8",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 7,
+				"materialCost": 13,
+				"additionalCosts": 3,
+				"total": 23
+			},
+			"price": 34.5
+		},
+		{
+			"productID": 9,
+			"name": "Product 9",
+			"description": "Description of Product 9",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 4,
+				"materialCost": 8,
+				"additionalCosts": 2,
+				"total": 14
+			},
+			"price": 21.0
+		},
+		{
+			"productID": 10,
+			"name": "Product 10",
+			"description": "Description of Product 10",
+			"unitOfMeasure": "unit",
+			"productionCost": {
+				"laborCost": 6,
+				"materialCost": 12,
+				"additionalCosts": 3,
+				"total": 21
+			},
+			"price": 31.5
+		}
+	],
+	"sales": [
+		{
+			"customerID": 1,
+			"products": [
+				{
+					"productID": 1,
+					"quantity": 2
+				},
+				{
+					"productID": 3,
+					"quantity": 1
+				}
+			],
+			"totalProductionCost": 47,
+			"total": 70.5
+		},
+		{
+			"customerID": 3,
+			"products": [
+				{
+					"productID": 2,
+					"quantity": 3
+				},
+				{
+					"productID": 4,
+					"quantity": 2
+				}
+			],
+			"totalProductionCost": 59,
+			"total": 163.5
+		},
+		{
+			"customerID": 2,
+			"products": [
+				{
+					"productID": 5,
+					"quantity": 4
+				}
+			],
+			"totalProductionCost": 42,
+			"total": 90
+		},
+		{
+			"customerID": 4,
+			"products": [
+				{
+					"productID": 7,
+					"quantity": 3
+				},
+				{
+					"productID": 10,
+					"quantity": 1
+				}
+			],
+			"totalProductionCost": 43,
+			"total": 108
+		},
+		{
+			"customerID": 5,
+			"products": [
+				{
+					"productID": 6,
+					"quantity": 2
+				},
+				{
+					"productID": 8,
+					"quantity": 2
+				}
+			],
+			"totalProductionCost": 42,
+			"total": 129
+		}
+	]
 }
-

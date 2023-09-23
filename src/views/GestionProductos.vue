@@ -5,14 +5,114 @@
 				<!-- Productos -->
 				<v-col>
 					<v-sheet min-height="70vh" rounded="lg" class="py-3 px-3">
-						<v-autocomplete
-							label="Buscar producto"
-							:items="products"
-							item-title="name"
-							return-object
-							v-model="selectedProduct"
-							clearable
-						></v-autocomplete>
+						<v-row class="px-3 py-3">
+							<v-autocomplete
+								label="Buscar producto"
+								:items="products"
+								item-title="name"
+								return-object
+								v-model="selectedProduct"
+								clearable
+							></v-autocomplete>
+
+							<!-- Boton de New Product -->
+							<v-btn color="primary" text
+								>Crear nuevo producto
+
+								<v-dialog v-model="dialog" activator="parent" width="50vw">
+									<v-card title="Añadir un nuevo producto">
+										<v-card-text>
+											<v-container>
+												<v-row>
+													<v-col cols="12">
+														<v-text-field
+															prepend-icon="mdi-text-account"
+															label="Nombre*"
+															required
+															hide-details="auto"
+														></v-text-field>
+													</v-col>
+													<v-col cols="12">
+														<v-textarea
+															prepend-icon="mdi-text"
+															label="Descripcion"
+															clearable
+															no-resize
+															rows="3"
+															hide-details="auto"
+														></v-textarea>
+													</v-col>
+
+													<v-col cols="12">
+														<v-text-field
+															prepend-icon="mdi-cash"
+															label="Costo de mano de obra*"
+															outlined
+															type="number"
+															hide-details="auto"
+														></v-text-field>
+													</v-col>
+
+													<v-col cols="12">
+														<v-text-field
+															prepend-icon="mdi-cash"
+															label="Costo de materiales*"
+															outlined
+															type="number"
+															hide-details="auto"
+														></v-text-field>
+													</v-col>
+
+													<v-col cols="12">
+														<v-text-field
+															prepend-icon="mdi-cash"
+															label="Costos adicionales*"
+															outlined
+															type="number"
+															hide-details="auto"
+														></v-text-field>
+													</v-col>
+
+													<v-col cols="12">
+														<v-text-field
+															prepend-icon="mdi-cash"
+															label="Costo de Producción total"
+															outlined
+															disabled
+															type="number"
+															hide-details="auto"
+														></v-text-field>
+													</v-col>
+
+													<v-col cols="12">
+														<v-text-field
+															prepend-icon="mdi-cash-check"
+															label="Precio"
+															outlined
+															type="number"
+														></v-text-field>
+													</v-col>
+												</v-row>
+											</v-container>
+											<small>* indica un campo requerido</small>
+										</v-card-text>
+										<v-card-actions>
+											<v-spacer></v-spacer>
+											<v-btn color="red" variant="text" @click="dialog = false">
+												Cancelar
+											</v-btn>
+											<v-btn
+												color="primary"
+												variant="flat"
+												@click="dialog = false"
+											>
+												Guardar
+											</v-btn>
+										</v-card-actions>
+									</v-card>
+								</v-dialog>
+							</v-btn>
+						</v-row>
 
 						<div class="px-1">
 							<v-row>
@@ -34,24 +134,97 @@
 
 				<!-- Edicion de producto -->
 				<v-col cols="2">
-					<v-sheet rounded="lg">
-						<v-list rounded="lg">
-							<v-list-item
-								v-for="n in 5"
-								:key="n"
-								link
-								:title="`List Item ${n}`"
-							></v-list-item>
+					<v-card>
+						<v-card-title>Editar Producto</v-card-title>
+						<v-card-text>
+							<v-form>
+								<v-text-field
+									v-model="editedProduct.name"
+									label="Nombre"
+									outlined
+								></v-text-field>
+								<v-textarea
+									v-model="editedProduct.description"
+									label="Descripción"
+									outlined
+								></v-textarea>
+								<v-text-field
+									v-model="editedProduct.productionCost.laborCost"
+									label="Mano de obra"
+									outlined
+									type="number"
+									@input="updateProductionCostTotal"
+								></v-text-field>
+								<v-text-field
+									v-model="editedProduct.productionCost.materialCost"
+									label="Costo de materiales"
+									outlined
+									type="number"
+									@input="updateProductionCostTotal"
+								></v-text-field>
+								<v-text-field
+									v-model="editedProduct.productionCost.additionalCosts"
+									label="Costos adicionales"
+									outlined
+									type="number"
+									@input="updateProductionCostTotal"
+								></v-text-field>
+								<v-text-field
+									v-model="editedProduct.productionCost.total"
+									label="Costo de Producción total"
+									outlined
+									disabled
+									type="number"
+								></v-text-field>
 
-							<v-divider class="my-2"></v-divider>
+								<v-text-field
+									v-model="editedProduct.price"
+									label="Precio"
+									outlined
+									type="number"
+								></v-text-field>
+								<v-btn
+									block
+									color="primary"
+									@click="handleUpdateProduct"
+									:disabled="isDisabled"
+									>Actualizar</v-btn
+								>
+								<v-btn class="mt-2" block color="red" :disabled="isDisabled"
+									>Eliminar
 
-							<v-list-item
-								color="grey-lighten-4"
-								link
-								title="Refresh"
-							></v-list-item>
-						</v-list>
-					</v-sheet>
+									<v-dialog
+										v-model="deleteDialog"
+										activator="parent"
+										width="auto"
+										persistent
+									>
+										<v-card title="Confirmacion">
+											<v-card-text>
+												<p>
+													Estas seguro que deseas eliminar el producto:
+													{{ editedProduct.name }}
+												</p>
+											</v-card-text>
+											<v-card-actions>
+												<v-spacer></v-spacer>
+												<v-btn color="red" @click="deleteDialog = false">
+													Cancelar
+												</v-btn>
+												<v-btn
+													color="red"
+													@click="handleDeleteProduct"
+													variant="flat"
+												>
+													Confirmar
+												</v-btn>
+											</v-card-actions>
+										</v-card>
+									</v-dialog>
+								</v-btn>
+							</v-form>
+						</v-card-text>
+					</v-card>
 				</v-col>
 			</v-row>
 		</v-container>
@@ -60,13 +233,85 @@
 
 <script setup>
 import axios from "axios";
-import { onBeforeMount, ref } from "vue";
+import { computed, onBeforeMount, ref, watch } from "vue";
 import Product from "../components/Product.vue";
 
 const products = ref([]);
 const selectedProduct = ref(null);
+const editedProduct = ref({
+	id: 0,
+	name: "",
+	description: "",
+	unitOfMeasure: "",
+	productionCost: {
+		laborCost: 0,
+		materialCost: 0,
+		additionalCosts: 0,
+		total: 0,
+	},
+	price: 0,
+});
+const dialog = ref(false);
+const deleteDialog = ref(false);
+const isDisabled = computed(() => {
+	return selectedProduct.value == null;
+});
 
 onBeforeMount(() => {
+	getProducts();
+});
+
+const handleProductClick = (product) => {
+	selectedProduct.value = product;
+	editedProduct.value = product;
+};
+
+const updateProductionCostTotal = () => {
+	editedProduct.value.productionCost.total =
+		Number(editedProduct.value.productionCost.laborCost) +
+		Number(editedProduct.value.productionCost.materialCost) +
+		Number(editedProduct.value.productionCost.additionalCosts);
+};
+
+const handleUpdateProduct = () => {
+	// TODO: Agregar validaciones y convertir los valores de los costos en numeros, que por defecto los toma como Strings
+	// Llamada a la API para actualizar un producto
+	let product = editedProduct.value;
+	product.productionCost.laborCost = Number(product.productionCost.laborCost);
+	product.productionCost.materialCost = Number(
+		product.productionCost.materialCost
+	);
+	product.productionCost.additionalCosts = Number(
+		product.productionCost.additionalCosts
+	);
+	product.productionCost.total = Number(product.productionCost.total);
+
+	axios
+		.put(`http://localhost:3000/products/${product.id}`, product)
+		.then((response) => {
+			getProducts();
+			selectedProduct.value = null;
+			return response.data;
+		})
+		.catch((error) => console.error(error));
+};
+
+const handleDeleteProduct = () => {
+	// Llamada a la API para borrar un producto
+	let product = selectedProduct.value;
+
+	axios
+		.delete(`http://localhost:3000/products/${product.id}`)
+		.then((response) => {
+			getProducts();
+			selectedProduct.value = null;
+			deleteDialog.value = false;
+			return response.data;
+		})
+		.catch((error) => console.error(error));
+};
+
+const getProducts = () => {
 	// Llamada a la API para obtener los productos
 	axios
 		.get("http://localhost:3000/products")
@@ -74,12 +319,27 @@ onBeforeMount(() => {
 			products.value = response.data;
 		})
 		.catch((error) => console.error(error));
-});
-
-const handleProductClick = (product) => {
-	selectedProduct.value = product;
-	console.log(selectedProduct.value);
 };
+
+watch(selectedProduct, () => {
+	if (selectedProduct.value == null) {
+		editedProduct.value = {
+			id: 0,
+			name: "",
+			description: "",
+			unitOfMeasure: "",
+			productionCost: {
+				laborCost: 0,
+				materialCost: 0,
+				additionalCosts: 0,
+				total: 0,
+			},
+			price: 0,
+		};
+	} else {
+		editedProduct.value = { ...selectedProduct.value };
+	}
+});
 </script>
 
 <style></style>

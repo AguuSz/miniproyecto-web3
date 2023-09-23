@@ -5,16 +5,26 @@
 				<!-- Productos -->
 				<v-col>
 					<v-sheet min-height="70vh" rounded="lg" class="py-3 px-3">
-						<SearchBar @search="handleSearch" />
+						<v-autocomplete
+							label="Buscar producto"
+							:items="products"
+							item-title="name"
+							return-object
+							v-model="selectedProduct"
+							clearable
+						></v-autocomplete>
 
 						<div class="px-1">
 							<v-row>
 								<v-col v-for="product in products" :key="product" cols="2">
 									<Product
+										id="product.id"
 										:name="product.name"
 										:price="product.price"
 										:description="product.description"
 										:productionCost="product.productionCost.total"
+										@click="handleProductClick(product)"
+										:isSelected="selectedProduct === product"
 									/>
 								</v-col>
 							</v-row>
@@ -52,9 +62,9 @@
 import axios from "axios";
 import { onBeforeMount, ref } from "vue";
 import Product from "../components/Product.vue";
-import SearchBar from "../components/SearchBar.vue";
 
 const products = ref([]);
+const selectedProduct = ref(null);
 
 onBeforeMount(() => {
 	// Llamada a la API para obtener los productos
@@ -65,6 +75,11 @@ onBeforeMount(() => {
 		})
 		.catch((error) => console.error(error));
 });
+
+const handleProductClick = (product) => {
+	selectedProduct.value = product;
+	console.log(selectedProduct.value);
+};
 </script>
 
 <style></style>

@@ -1,7 +1,12 @@
 <template>
 	<div>
 		<v-hover v-slot="{ isHovering, props }">
-			<v-card v-bind="props" :color="isHovering ? 'primary' : 'grey'">
+			<v-card
+				v-bind="props"
+				:color="
+					isSelected ? 'primary' : isHovering ? 'secondary' : 'grey-darken-3'
+				"
+			>
 				<v-card-item>
 					<v-card-title>
 						<h3>{{ name }}</h3>
@@ -20,11 +25,17 @@
 </template>
 
 <script setup>
+import { defineProps } from "vue";
 const props = defineProps({
 	name: String,
 	price: Number,
 	description: String,
 	productionCost: Number,
+	isSelected: Boolean,
 });
 </script>
-<style></style>
+<style>
+.selected-product {
+	background: yellow !important;
+}
+</style>

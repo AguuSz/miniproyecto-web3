@@ -104,7 +104,7 @@
 											<v-btn
 												color="primary"
 												variant="flat"
-												@click="dialog = false"
+												@click="handleDeleteProduct"
 											>
 												Guardar
 											</v-btn>
@@ -232,9 +232,10 @@
 </template>
 
 <script setup>
-import axios from "axios";
 import { computed, onBeforeMount, ref, watch } from "vue";
+import { Validator } from "../common/Validator";
 import Product from "../components/Product.vue";
+import { ProductService } from "../services/ProductService";
 
 const products = ref([]);
 const selectedProduct = ref(null);
@@ -273,52 +274,76 @@ const updateProductionCostTotal = () => {
 		Number(editedProduct.value.productionCost.additionalCosts);
 };
 
-const handleUpdateProduct = () => {
+const handleUpdateProduct = async () => {
 	// TODO: Agregar validaciones y convertir los valores de los costos en numeros, que por defecto los toma como Strings
 	// Llamada a la API para actualizar un producto
-	let product = editedProduct.value;
-	product.productionCost.laborCost = Number(product.productionCost.laborCost);
-	product.productionCost.materialCost = Number(
-		product.productionCost.materialCost
-	);
-	product.productionCost.additionalCosts = Number(
-		product.productionCost.additionalCosts
-	);
-	product.productionCost.total = Number(product.productionCost.total);
+	try {
+		const product = editedProduct.value;
 
-	axios
-		.put(`http://localhost:3000/products/${product.id}`, product)
-		.then((response) => {
-			getProducts();
-			selectedProduct.value = null;
-			return response.data;
-		})
-		.catch((error) => console.error(error));
+		product.productionCost.laborCost = Validator.stringToNumber(
+			product.productionCost.laborCost
+		);
+		product.productionCost.materialCost = Validator.stringToNumber(
+			product.productionCost.materialCost
+		);
+		product.productionCost.additionalCosts = Validator.stringToNumber(
+			product.productionCost.additionalCosts
+		);
+		product.productionCost.total = Validator.stringToNumber(
+			product.productionCost.total
+		);
+
+		const response = await ProductService.updateProduct(product);
+
+		getProducts();
+		selectedProduct.value = null;
+
+		console.log("Producto actualizado:", response);
+	} catch (error) {
+		// TODO: Arrojar Toastr con el error
+		console.error("Error al actualizar el producto:", error);
+	}
 };
 
-const handleDeleteProduct = () => {
+const handleDeleteProduct = async () => {
 	// Llamada a la API para borrar un producto
 	let product = selectedProduct.value;
 
-	axios
-		.delete(`http://localhost:3000/products/${product.id}`)
-		.then((response) => {
-			getProducts();
-			selectedProduct.value = null;
-			deleteDialog.value = false;
-			return response.data;
-		})
-		.catch((error) => console.error(error));
+	try {
+		await ProductService.deleteProduct(product.id);
+		getProducts();
+		selectedProduct.value = null;
+		deleteDialog.value = false;
+	} catch (error) {
+		// TODO: Arrojar Toastr con el error
+		console.error("Error al eliminar el producto:", error);
+	}
 };
 
-const getProducts = () => {
+const handleCreateProduct = async () => {
+	// Llamada a la API para crear un producto
+	try {
+		// let newProduct = form.value;
+		const response = await ProductService.createProduct(newProduct);
+		getProducts();
+		selectedProduct.value = null;
+		dialog.value = false;
+		console.log("Producto creado:", response);
+	} catch (error) {
+		// TODO: Arrojar Toastr con el error
+		console.error("Error al crear el producto:", error);
+	}
+};
+
+const getProducts = async () => {
 	// Llamada a la API para obtener los productos
-	axios
-		.get("http://localhost:3000/products")
-		.then((response) => {
-			products.value = response.data;
-		})
-		.catch((error) => console.error(error));
+	try {
+		const response = await ProductService.getProducts();
+		products.value = response.data;
+	} catch (error) {
+		// TODO: Arrojar Toastr con el error
+		console.error("Error al obtener los producto:", error);
+	}
 };
 
 watch(selectedProduct, () => {

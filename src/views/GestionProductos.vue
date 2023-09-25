@@ -104,7 +104,7 @@
 											<v-btn
 												color="primary"
 												variant="flat"
-												@click="handleDeleteProduct"
+												@click="handleCreateProduct"
 											>
 												Guardar
 											</v-btn>
@@ -141,6 +141,7 @@
 								<v-text-field
 									v-model="editedProduct.name"
 									label="Nombre"
+									:error-messages="errors.name"
 									outlined
 								></v-text-field>
 								<v-textarea
@@ -151,6 +152,7 @@
 								<v-text-field
 									v-model="editedProduct.productionCost.laborCost"
 									label="Mano de obra"
+									:error-messages="errors.laborCost"
 									outlined
 									type="number"
 									@input="updateProductionCostTotal"
@@ -158,6 +160,7 @@
 								<v-text-field
 									v-model="editedProduct.productionCost.materialCost"
 									label="Costo de materiales"
+									:error-messages="errors.materialCost"
 									outlined
 									type="number"
 									@input="updateProductionCostTotal"
@@ -165,6 +168,7 @@
 								<v-text-field
 									v-model="editedProduct.productionCost.additionalCosts"
 									label="Costos adicionales"
+									:error-messages="errors.additionalCosts"
 									outlined
 									type="number"
 									@input="updateProductionCostTotal"
@@ -180,6 +184,7 @@
 								<v-text-field
 									v-model="editedProduct.price"
 									label="Precio"
+									:error-messages="errors.price"
 									outlined
 									type="number"
 								></v-text-field>
@@ -233,6 +238,7 @@
 
 <script setup>
 import { computed, onBeforeMount, ref, watch } from "vue";
+import { Utils } from "../common/Utils";
 import { Validator } from "../common/Validator";
 import Product from "../components/Product.vue";
 import { ProductService } from "../services/ProductService";
@@ -257,14 +263,16 @@ const deleteDialog = ref(false);
 const isDisabled = computed(() => {
 	return selectedProduct.value == null;
 });
+const errors = ref({});
 
 onBeforeMount(() => {
 	getProducts();
 });
 
 const handleProductClick = (product) => {
+	errors.value = {};
 	selectedProduct.value = product;
-	editedProduct.value = product;
+	editedProduct.value = { ...product };
 };
 
 const updateProductionCostTotal = () => {
@@ -292,6 +300,14 @@ const handleUpdateProduct = async () => {
 		product.productionCost.total = Validator.stringToNumber(
 			product.productionCost.total
 		);
+		product.price = Validator.stringToNumber(product.price);
+
+		// Validacion del producto
+		errors.value = Validator.validateProduct(product);
+
+		if (!Utils.isJSONEmpty(errors.value)) {
+			throw new Error("El producto no es valido");
+		}
 
 		const response = await ProductService.updateProduct(product);
 
@@ -321,25 +337,24 @@ const handleDeleteProduct = async () => {
 };
 
 const handleCreateProduct = async () => {
-	// Llamada a la API para crear un producto
-	try {
-		// let newProduct = form.value;
-		const response = await ProductService.createProduct(newProduct);
-		getProducts();
-		selectedProduct.value = null;
-		dialog.value = false;
-		console.log("Producto creado:", response);
-	} catch (error) {
-		// TODO: Arrojar Toastr con el error
-		console.error("Error al crear el producto:", error);
-	}
+	// // Llamada a la API para crear un producto
+	// try {
+	// 	// let newProduct = form.value;
+	// 	const response = await ProductService.createProduct(newProduct);
+	// 	getProducts();
+	// 	selectedProduct.value = null;
+	// 	dialog.value = false;
+	// 	console.log("Producto creado:", response);
+	// } catch (error) {
+	// 	// TODO: Arrojar Toastr con el error
+	// 	console.error("Error al crear el producto:", error);
+	// }
 };
 
 const getProducts = async () => {
 	// Llamada a la API para obtener los productos
 	try {
-		const response = await ProductService.getProducts();
-		products.value = response.data;
+		products.value = await ProductService.getProducts();
 	} catch (error) {
 		// TODO: Arrojar Toastr con el error
 		console.error("Error al obtener los producto:", error);

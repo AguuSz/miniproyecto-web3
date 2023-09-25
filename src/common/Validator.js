@@ -2,7 +2,10 @@
 export const Validator = {
 	validateProduct(product) {
 		const errors = {};
-		if (!product.name) {
+		product.name = product.name.trim();
+		product.description = product.description.trim();
+
+		if (!product.name || product.name == "") {
 			errors.name = "El nombre es obligatorio";
 		}
 		if (!product.price) {
@@ -11,16 +14,18 @@ export const Validator = {
 		if (product.price < 0) {
 			errors.price = "El precio no puede ser negativo";
 		}
-		if (
-			product.laborCost < 0 ||
-			product.materialCost < 0 ||
-			product.additionalCosts < 0
-		) {
-			errors.productionCosts = "Los costos no pueden ser negativos";
+		if (product.productionCost.laborCost < 0) {
+			errors.laborCost = "El costo de mano de obra no puede ser negativo";
+		}
+		if (product.productionCost.materialCost < 0) {
+			errors.materialCost = "El costo de materiales no puede ser negativo";
+		}
+		if (product.productionCost.additionalCosts < 0) {
+			errors.additionalCosts = "Los costos adicionales no pueden ser negativos";
 		}
 		return errors;
 	},
 	stringToNumber(value) {
-		return Number(value.replace(/[^0-9.-]+/g, ""));
+		return Number(value);
 	},
 };

@@ -76,6 +76,9 @@
                             </tr>
                           </thead>
                           <tbody>
+                      <tr>
+
+                      </tr>
                             <tr
                               v-for="item in currentCart.items"
                               :key="item"
@@ -87,9 +90,24 @@
                               <td>{{ item.total }}</td>
                             </tr>
                             <tr></tr>
-                            <tr>
-                              <td>
-                          <v-autocomplete
+                            
+                      <tr>
+                        <td colspan="4"></td>
+                        <td>
+                          <v-text-field
+                            label="Total"
+                            prefix="$"
+                            v-model = currentCart.total
+                            readonly
+                          ></v-text-field>
+                        </td>
+                      </tr>
+                    </tbody>
+                    
+                  </v-table>
+                  <v-row>
+                          <v-col cols="2">
+                            <v-autocomplete
                             v-model = currentItem
                             
                             :items="products"
@@ -97,8 +115,10 @@
                             :item-value="(item) => item"
                             @input = "updateSubTotal"
                           ></v-autocomplete>
-                        </td>
-                        <td>
+                        </v-col>
+                          
+                        
+                        <v-col cols="4">
                           <v-autocomplete
                             v-model = currentItem
                             
@@ -108,8 +128,8 @@
                             
                             
                           ></v-autocomplete>
-                        </td>
-                        <td>
+                        </v-col>
+                        <v-col cols="2">
                           <v-text-field
                             
                             type="number"
@@ -117,18 +137,18 @@
                             min="1"
                             
                           ></v-text-field>
-                        </td>
-                        <td>
+                        </v-col>
+                        <v-col cols="2">
                           <v-text-field
                             
                             prefix="$"
                             v-model = currentItem.price
                             
-                            readonly
+                            read
+                            only
                           ></v-text-field>
-                        </td>
-                        
-                        <td>
+                        </v-col>
+                        <v-col cols="2">
                           <v-text-field
                             
                             prefix="$"
@@ -136,21 +156,20 @@
                             :item-value="(item) => item"
                             readonly
                           ></v-text-field>
-                        </td>
-                        <v-divider :thickness="5"></v-divider>
-                            </tr>
-                          </tbody>
-                        </v-table>
+                        </v-col>
+                      </v-row>
                       
                       
-                    </v-container>
-                  </v-card-text>
-                  <v-card-actions>
-                    <v-btn color="indigo-darken-1" variant="flat" text @click="addNewProduct">Agregar nuevo producto </v-btn>
-                    <v-spacer></v-spacer>
-                    <v-btn color="blue darken-1"  text @click="close">Cancelar</v-btn>
-                    <v-btn color="blue darken-1" variant="flat" text @click="saveSale">Guardar</v-btn>
-                  </v-card-actions>
+              </v-container>
+                  
+            </v-card-text>
+                  
+            <v-card-actions>
+                <v-btn color="indigo-darken-1" variant="flat" text @click="addNewProduct">Agregar nuevo producto </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn color="blue darken-1"  text @click="cancelSale">Cancelar</v-btn>
+                <v-btn color="blue darken-1" variant="flat" text @click="saveSale">Guardar</v-btn>
+            </v-card-actions>
                 </v-card>	
 						  </v-dialog>
             </v-btn>
@@ -266,17 +285,50 @@ const getSales = async () => {
 const getClients = async () => {
 	try {
 		clients.value = await ClientService.getClients();
+    clients.value.append({
+      id: 0,
+      name: "Sin cliente",
+      address: "",
+      phone: "",
+    })
 	} catch (error) {
 		console.error("Error al obtener los producto:", error);
 	}
 };
 
+const cancelSale = () => {
+  currentCart.value = {
+    client: currentClient.value,
+    items: [
+    ],
+    total: 0,
+  }
+  dialog.value = false;
+}
+
 const saveSale = async () => {
+  // Check si hay productos en la venta
+  if(currentCart.value.items.length == 0){
+    alert("No hay productos en la venta")
+    return;
+  } 
+  // Check si el cliente existe
+  if(!(currentCart.value.client in clients.value)){
+    alert("No hay cliente seleccionado")
+    return;
+  } 
   try{
     let cart = cartAdapter(currentCart.value);
     console.log(JSON.stringify(cart))
     const response = await SaleService.createSale(cart);
     getSales();
+    currentCart.value = {
+      client: 0,
+      items: [
+      ],
+      total: 0,
+    }
+
     
     dialog.value = false;
     console.log("Venta guardada con exito");

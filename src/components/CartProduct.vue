@@ -1,47 +1,53 @@
 <template>
-	<div>
-		<v-row >
-            <v-col cols="2">
-               	<v-text-field
-                   	readonly
-					label = "ID"
-				></v-text-field>
-            </v-col>
-            <v-col cols="4">
-				<v-text-field
-                   	readonly
-               		> {{ name }}
-				</v-text-field>
-            </v-col>
-            <v-col cols="2">
-				<v-text-field
-                   	readonly
-               		> {{ quantity }}
-				</v-text-field>
-            </v-col>
-            <v-col cols="2">
-				<v-text-field
-            		readonly
-             		> {{ price }}
-				</v-text-field>
-			</v-col>
-                        
-    	</v-row>
-	</div>
+	
+	<v-col cols="2">
+    <v-text-field
+	  readonly>
+		</v-text-field>
+	</v-col>
+  <v-col cols="4">
+    <v-text-field
+    
+    label = "Producto"
+    readonly
+    ></v-text-field>
+  </v-col>
+  <v-col cols="2">
+    <v-text-field
+      label="Cantidad"
+      readonly
+    ></v-text-field>
+  </v-col>
+  <v-col cols="2">
+    <v-text-field
+      label="Precio"
+      readonly
+    ></v-text-field>
+  </v-col>
+  <v-col cols="2">
+    <v-text-field
+      v-model="total"
+      label="Total"
+			readonly	
+    ></v-text-field>
+  </v-col>
+	
 </template>
 
-<script setup>
-import { defineProps } from "vue";
-const props = defineProps({
-	id: Number,
-	name: String,
-	price: Number,
-	quantity: Number,
-	
-});
+<script >
+export default {
+  props: {
+    id: Number,
+	  name: String,
+	  price: Number,
+	  quantity: Number,
+  },
+  computed: {
+    total() {
+      return this.price * this.quantity;
+    },
+  },
+};
 </script>
 <style>
-.selected-product {
-	background: yellow !important;
-}
 </style>

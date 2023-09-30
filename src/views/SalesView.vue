@@ -48,62 +48,100 @@
                             clearable
                           ></v-autocomplete>
                         </v-col>
+                        <v-divider :thickness="5"></v-divider>
+                      </v-row>
+                      
+                      <v-row >
                         
                       </v-row>
-                      <v-row >
-                        <v-col cols="2">
+                      
+                      <v-table>
+                          <thead>
+                            <tr>
+                              <th class="text-left">
+                                id
+                              </th>
+                              <th class="text-left">
+                                Nombre
+                              </th>
+                              <th>
+                                Cantidad
+                              </th>
+                              <th>
+                                Precio
+                              </th>
+                              <th>
+                                Total
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr
+                              v-for="item in currentCart.items"
+                              :key="item"
+                            >
+                              <td>{{ item.product }}</td>
+                              <td>{{item.name}} </td>
+                              <td>{{ item.quantity }}</td>
+                              <td>{{ item.price }}</td>
+                              <td>{{ item.total }}</td>
+                            </tr>
+                            <tr></tr>
+                            <tr>
+                              <td>
                           <v-autocomplete
                             v-model = currentItem
-                            label = "Id"
+                            
                             :items="products"
                             item-title="id"
                             :item-value="(item) => item"
                             @input = "updateSubTotal"
                           ></v-autocomplete>
-                        </v-col>
-                        <v-col cols="4">
+                        </td>
+                        <td>
                           <v-autocomplete
                             v-model = currentItem
-                            label = "Producto"
+                            
                             :items="products"
                             item-title="name"
                             :item-value="(item) => item"
                             
                             
                           ></v-autocomplete>
-                        </v-col>
-                        <v-col cols="2">
+                        </td>
+                        <td>
                           <v-text-field
-                            label="Cantidad"
+                            
                             type="number"
                             v-model = currentQuantity
                             min="1"
+                            
                           ></v-text-field>
-                        </v-col>
-                        <v-col cols="2">
+                        </td>
+                        <td>
                           <v-text-field
-                            label="Precio"
+                            
+                            prefix="$"
                             v-model = currentItem.price
                             
                             readonly
                           ></v-text-field>
-                        </v-col>
-                        <v-col cols="2">
+                        </td>
+                        
+                        <td>
                           <v-text-field
-                            label="Total"
+                            
+                            prefix="$"
                             v-model = currentTotal
                             :item-value="(item) => item"
                             readonly
                           ></v-text-field>
-                        </v-col>
-                      </v-row>
-                      <v-row v-for="product in products">
-                        <CartProduct 
-                          :id="product.product" 
-                          :name="product.product" 
-                          :price="product.total" 
-                          :quantity="product.quantity"/>
-                      </v-row>
+                        </td>
+                        <v-divider :thickness="5"></v-divider>
+                            </tr>
+                          </tbody>
+                        </v-table>
+                      
                       
                     </v-container>
                   </v-card-text>
@@ -111,7 +149,7 @@
                     <v-btn color="indigo-darken-1" variant="flat" text @click="addNewProduct">Agregar nuevo producto </v-btn>
                     <v-spacer></v-spacer>
                     <v-btn color="blue darken-1"  text @click="close">Cancelar</v-btn>
-                    <v-btn color="blue darken-1" variant="flat" text @click="save">Guardar</v-btn>
+                    <v-btn color="blue darken-1" variant="flat" text @click="saveSale">Guardar</v-btn>
                   </v-card-actions>
                 </v-card>	
 						  </v-dialog>
@@ -140,6 +178,7 @@ const sales = new ref([]);
 
 const dialog = new ref(false);
 
+
 const currentItem = new ref({
   id: 0,
   name: "",
@@ -157,7 +196,8 @@ const currentClient = new ref({
 
 const currentCart = new ref({
   client: currentClient.value,
-  items: [{product:1,quantity:1,total:25.5},{product:2,quantity:1,total:31.5}],
+  items: [
+  ],
   total: 0,
 })
 
@@ -170,13 +210,26 @@ onBeforeMount(() => {
 });
 
 const addNewProduct = () => {
-  currentCart.value.items.push({
+  if(currentItem.value.id == 0){
+    alert("Seleccione un producto")
+    return;
+  }else{
+    currentCart.value.items.push({
     product : currentItem.value.id,
+    name : currentItem.value.name,
     quantity : currentQuantity.value,
+    price: currentItem.value.price,
     total : currentTotal.value,  
   })
   updateTotal();
-  console.log(JSON.stringify(currentCart.value))
+  currentItem.value ={
+  id: 0,
+  name: "",
+  price: 0,
+}
+  //console.log(JSON.stringify(currentCart.value))
+  }
+  
 }
 
 const updateSubTotal = () => {
@@ -191,6 +244,8 @@ const updateTotal = () => {
   })
 }
 
+
+
 const getProducts = async () => {
 	// Llamada a la API para obtener los productos
 	try {
@@ -201,6 +256,9 @@ const getProducts = async () => {
 		console.error("Error al obtener los producto:", error);
 	}
 };
+
+
+
 const getSales = async () => {
 	// Llamada a la API para obtener las ventas
 	try {
@@ -220,6 +278,26 @@ const getClients = async () => {
 		console.error("Error al obtener los producto:", error);
 	}
 };
+
+const saveSale = async () => {
+  try{
+    let sale = currentCart.value;
+    const response = await SaleService.createSale(sale);
+    getSales();
+    currentCart = {
+      id: 0,
+      client: "",
+      items: [],
+      total: 0,
+    };
+    dialog.value = false;
+    console.log("Venta guardada con exito");
+  }catch(error){
+    console.error("Error al guardar la venta:", error);
+  } 
+}
+
+
 
 watch(currentQuantity, updateSubTotal)
 watch(currentItem, updateSubTotal)

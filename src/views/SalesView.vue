@@ -247,12 +247,9 @@ const updateTotal = () => {
 
 
 const getProducts = async () => {
-	// Llamada a la API para obtener los productos
 	try {
 		products.value  = await ProductService.getProducts();
-		
 	} catch (error) {
-		// TODO: Arrojar Toastr con el error
 		console.error("Error al obtener los producto:", error);
 	}
 };
@@ -260,36 +257,27 @@ const getProducts = async () => {
 
 
 const getSales = async () => {
-	// Llamada a la API para obtener las ventas
 	try {
-		sales.value = await SaleService.getSales();
-		 
+		sales.value = await SaleService.getSales(); 
 	} catch (error) {
-		// TODO: Arrojar Toastr con el error
 		console.error("Error al obtener los producto:", error);
 	}
 };
 const getClients = async () => {
-	// Llamada a la API para obtener las ventas
 	try {
 		clients.value = await ClientService.getClients();
 	} catch (error) {
-		// TODO: Arrojar Toastr con el error
 		console.error("Error al obtener los producto:", error);
 	}
 };
 
 const saveSale = async () => {
   try{
-    let sale = currentCart.value;
-    const response = await SaleService.createSale(sale);
+    let cart = cartAdapter(currentCart.value);
+    console.log(JSON.stringify(cart))
+    const response = await SaleService.createSale(cart);
     getSales();
-    currentCart = {
-      id: 0,
-      client: "",
-      items: [],
-      total: 0,
-    };
+    
     dialog.value = false;
     console.log("Venta guardada con exito");
   }catch(error){
@@ -297,7 +285,26 @@ const saveSale = async () => {
   } 
 }
 
+const cartAdapter = (cart) => {
+  
+  return {
+    customerID: cart.client,
+    products: productsAdapter(cart.items),
+    total: cart.total,
+  } 
 
+}
+
+const productsAdapter = (products) => {
+  let productsP = [];
+  products.forEach(item => {
+    productsP.push({
+      product: item.product,
+      quantity: item.quantity,
+    })});
+  
+  return productsP;
+}
 
 watch(currentQuantity, updateSubTotal)
 watch(currentItem, updateSubTotal)

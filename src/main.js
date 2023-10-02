@@ -1,3 +1,5 @@
+import VueDatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 import { createApp } from "vue";
 import App from "./App.vue";
 import vuetify from "./plugins/vuetify";
@@ -6,4 +8,8 @@ import router from "./router";
 
 loadFonts();
 
-createApp(App).use(router).use(vuetify).mount("#app");
+createApp(App)
+	.component("VueDatePicker", VueDatePicker)
+	.use(router)
+	.use(vuetify)
+	.mount("#app");

@@ -19,15 +19,19 @@ export const SaleService = {
 	},
 
 	async updateSale(Sale) {
-		const response = await axios.put(
-			`${API_BASE_URL}/sales/${Sale.id}`,
-			Sale
-		);
+		const response = await axios.put(`${API_BASE_URL}/sales/${Sale.id}`, Sale);
 		return response.data;
 	},
 
 	async deleteSale(id) {
 		const response = await axios.delete(`${API_BASE_URL}/sales/${id}`);
+		return response.data;
+	},
+
+	async getSalesSinceDateAndToDate(since, to) {
+		const response = await axios.get(
+			`${API_BASE_URL}/sales?date_gte=${since}&date_lte=${to}`
+		);
 		return response.data;
 	},
 };

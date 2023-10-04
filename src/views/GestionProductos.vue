@@ -5,7 +5,7 @@
 				<!-- Productos -->
 				<v-col>
 					<v-sheet min-height="70vh" rounded="lg" class="py-3 px-3">
-						<v-row class="px-3 py-3">
+						<v-row class="px-3 py-3 d-flex">
 							<v-autocomplete
 								label="Buscar producto"
 								:items="products"
@@ -13,11 +13,16 @@
 								return-object
 								v-model="selectedProduct"
 								clearable
+								hide-details="auto"
 							></v-autocomplete>
 
 							<!-- Boton de New Product -->
-							<v-btn color="primary" text
-								>Crear nuevo producto
+							<v-btn
+								color="primary ml-2 align-self-center"
+								elevated
+								prepend-icon="mdi-plus"
+								@click="newProductErrors = {}"
+								>Nuevo producto
 
 								<v-dialog v-model="dialog" activator="parent" width="50vw">
 									<v-card title="Añadir un nuevo producto">
@@ -28,6 +33,8 @@
 														<v-text-field
 															prepend-icon="mdi-text-account"
 															label="Nombre*"
+															v-model="newProduct.name"
+															:error-messages="newProductErrors.name"
 															required
 															hide-details="auto"
 														></v-text-field>
@@ -36,6 +43,7 @@
 														<v-textarea
 															prepend-icon="mdi-text"
 															label="Descripcion"
+															v-model="newProduct.description"
 															clearable
 															no-resize
 															rows="3"
@@ -47,9 +55,12 @@
 														<v-text-field
 															prepend-icon="mdi-cash"
 															label="Costo de mano de obra*"
+															v-model="newProduct.productionCost.laborCost"
+															:error-messages="newProductErrors.laborCost"
 															outlined
 															type="number"
 															hide-details="auto"
+															@input="updateProductionCostTotalNewProduct"
 														></v-text-field>
 													</v-col>
 
@@ -57,9 +68,12 @@
 														<v-text-field
 															prepend-icon="mdi-cash"
 															label="Costo de materiales*"
+															v-model="newProduct.productionCost.materialCost"
+															:error-messages="newProductErrors.materialCost"
 															outlined
 															type="number"
 															hide-details="auto"
+															@input="updateProductionCostTotalNewProduct"
 														></v-text-field>
 													</v-col>
 
@@ -67,9 +81,14 @@
 														<v-text-field
 															prepend-icon="mdi-cash"
 															label="Costos adicionales*"
+															v-model="
+																newProduct.productionCost.additionalCosts
+															"
+															:error-messages="newProductErrors.additionalCosts"
 															outlined
 															type="number"
 															hide-details="auto"
+															@input="updateProductionCostTotalNewProduct"
 														></v-text-field>
 													</v-col>
 
@@ -77,6 +96,7 @@
 														<v-text-field
 															prepend-icon="mdi-cash"
 															label="Costo de Producción total"
+															v-model="newProduct.productionCost.total"
 															outlined
 															disabled
 															type="number"
@@ -88,6 +108,8 @@
 														<v-text-field
 															prepend-icon="mdi-cash-check"
 															label="Precio"
+															v-model="newProduct.price"
+															:error-messages="newProductErrors.price"
 															outlined
 															type="number"
 														></v-text-field>
@@ -116,7 +138,7 @@
 
 						<div class="px-1">
 							<v-row>
-								<v-col v-for="product in products" :key="product" cols="2">
+								<v-col v-for="product in products" :key="product" cols="3">
 									<Product
 										id="product.id"
 										:name="product.name"
@@ -141,7 +163,7 @@
 								<v-text-field
 									v-model="editedProduct.name"
 									label="Nombre"
-									:error-messages="errors.name"
+									:error-messages="editedProductErrors.name"
 									outlined
 								></v-text-field>
 								<v-textarea
@@ -152,26 +174,26 @@
 								<v-text-field
 									v-model="editedProduct.productionCost.laborCost"
 									label="Mano de obra"
-									:error-messages="errors.laborCost"
+									:error-messages="editedProductErrors.laborCost"
 									outlined
 									type="number"
-									@input="updateProductionCostTotal"
+									@input="updateProductionCostTotalEditedProduct"
 								></v-text-field>
 								<v-text-field
 									v-model="editedProduct.productionCost.materialCost"
 									label="Costo de materiales"
-									:error-messages="errors.materialCost"
+									:error-messages="editedProductErrors.materialCost"
 									outlined
 									type="number"
-									@input="updateProductionCostTotal"
+									@input="updateProductionCostTotalEditedProduct"
 								></v-text-field>
 								<v-text-field
 									v-model="editedProduct.productionCost.additionalCosts"
 									label="Costos adicionales"
-									:error-messages="errors.additionalCosts"
+									:error-messages="editedProductErrors.additionalCosts"
 									outlined
 									type="number"
-									@input="updateProductionCostTotal"
+									@input="updateProductionCostTotalEditedProduct"
 								></v-text-field>
 								<v-text-field
 									v-model="editedProduct.productionCost.total"
@@ -184,7 +206,7 @@
 								<v-text-field
 									v-model="editedProduct.price"
 									label="Precio"
-									:error-messages="errors.price"
+									:error-messages="editedProductErrors.price"
 									outlined
 									type="number"
 								></v-text-field>
@@ -237,7 +259,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeMount, ref, watch } from "vue";
+import { computed, onBeforeMount, ref, toRaw, watch } from "vue";
 import { Utils } from "../common/Utils";
 import { Validator } from "../common/Validator";
 import Product from "../components/Product.vue";
@@ -258,28 +280,48 @@ const editedProduct = ref({
 	},
 	price: 0,
 });
+const newProduct = ref({
+	name: "",
+	description: "",
+	unitOfMeasure: "",
+	productionCost: {
+		laborCost: 0,
+		materialCost: 0,
+		additionalCosts: 0,
+		total: 0,
+	},
+	price: 0,
+});
 const dialog = ref(false);
 const deleteDialog = ref(false);
 const isDisabled = computed(() => {
 	return selectedProduct.value == null;
 });
-const errors = ref({});
+const editedProductErrors = ref({});
+const newProductErrors = ref({});
 
 onBeforeMount(() => {
 	getProducts();
 });
 
 const handleProductClick = (product) => {
-	errors.value = {};
+	editedProductErrors.value = {};
 	selectedProduct.value = product;
 	editedProduct.value = { ...product };
 };
 
-const updateProductionCostTotal = () => {
+const updateProductionCostTotalEditedProduct = () => {
 	editedProduct.value.productionCost.total =
 		Number(editedProduct.value.productionCost.laborCost) +
 		Number(editedProduct.value.productionCost.materialCost) +
 		Number(editedProduct.value.productionCost.additionalCosts);
+};
+
+const updateProductionCostTotalNewProduct = () => {
+	newProduct.value.productionCost.total =
+		Number(newProduct.value.productionCost.laborCost) +
+		Number(newProduct.value.productionCost.materialCost) +
+		Number(newProduct.value.productionCost.additionalCosts);
 };
 
 const handleUpdateProduct = async () => {
@@ -288,33 +330,13 @@ const handleUpdateProduct = async () => {
 	try {
 		const product = editedProduct.value;
 
-		product.productionCost.laborCost = Validator.stringToNumber(
-			product.productionCost.laborCost
-		);
-		product.productionCost.materialCost = Validator.stringToNumber(
-			product.productionCost.materialCost
-		);
-		product.productionCost.additionalCosts = Validator.stringToNumber(
-			product.productionCost.additionalCosts
-		);
-		product.productionCost.total = Validator.stringToNumber(
-			product.productionCost.total
-		);
-		product.price = Validator.stringToNumber(product.price);
-
-		// Validacion del producto
-		errors.value = Validator.validateProduct(product);
-
-		if (!Utils.isJSONEmpty(errors.value)) {
+		if (isProductValid(product, editedProductErrors)) {
+			await ProductService.updateProduct(product);
+			getProducts();
+			selectedProduct.value = null;
+		} else {
 			throw new Error("El producto no es valido");
 		}
-
-		const response = await ProductService.updateProduct(product);
-
-		getProducts();
-		selectedProduct.value = null;
-
-		console.log("Producto actualizado:", response);
 	} catch (error) {
 		// TODO: Arrojar Toastr con el error
 		console.error("Error al actualizar el producto:", error);
@@ -337,18 +359,17 @@ const handleDeleteProduct = async () => {
 };
 
 const handleCreateProduct = async () => {
-	// // Llamada a la API para crear un producto
-	// try {
-	// 	// let newProduct = form.value;
-	// 	const response = await ProductService.createProduct(newProduct);
-	// 	getProducts();
-	// 	selectedProduct.value = null;
-	// 	dialog.value = false;
-	// 	console.log("Producto creado:", response);
-	// } catch (error) {
-	// 	// TODO: Arrojar Toastr con el error
-	// 	console.error("Error al crear el producto:", error);
-	// }
+	// Llamada a la API para crear un producto
+	try {
+		if (isProductValid(toRaw(newProduct.value), newProductErrors)) {
+			await ProductService.createProduct(toRaw(newProduct.value));
+			getProducts();
+			selectedProduct.value = null;
+			dialog.value = false;
+		}
+	} catch (error) {
+		console.error("Error al crear el producto:", error);
+	}
 };
 
 const getProducts = async () => {
@@ -380,6 +401,35 @@ watch(selectedProduct, () => {
 		editedProduct.value = { ...selectedProduct.value };
 	}
 });
+
+const isProductValid = (product, errors) => {
+	// Dejamos la lista de errores vacia
+	errors.value = {};
+
+	// Validacion de los costos de produccion
+	product.productionCost.laborCost = Validator.stringToNumber(
+		product.productionCost.laborCost
+	);
+	product.productionCost.materialCost = Validator.stringToNumber(
+		product.productionCost.materialCost
+	);
+	product.productionCost.additionalCosts = Validator.stringToNumber(
+		product.productionCost.additionalCosts
+	);
+	product.productionCost.total = Validator.stringToNumber(
+		product.productionCost.total
+	);
+	product.price = Validator.stringToNumber(product.price);
+
+	// Validacion del producto
+	errors.value = Validator.validateProduct(product);
+
+	if (!Utils.isJSONEmpty(errors.value)) {
+		return false;
+	}
+
+	return true;
+};
 </script>
 
 <style></style>

@@ -8,14 +8,14 @@
           <v-row>
 
             
-            <v-autocomplete
-            
+            <v-text-field
+            v-model="search"
             label="Buscar ventas por Cliente/producto/Id"
-            :items="sales"
+            
             prepend-icon="mdi-text-search"
-            item-title="customerID"
-            clearable
-            ></v-autocomplete>
+            
+            
+            ></v-text-field>
 
             <!-- Boton cargar venta-->
             <v-btn color="primary" class="mt-3" >
@@ -174,11 +174,80 @@
 						  </v-dialog>
             </v-btn>
           </v-row>
-          
+          <v-data-table
+              v-model:expanded="expanded"
+              :headers="[
+                    {
+                      title: 'Id',
+                      align: 'start',
+                      sortable: false,
+                      key: 'id',
+                    },
+                    
+                    { title: 'Customer', key: 'customerID' },
+                    { title: 'Fecha', key: 'date' },
+                    { title: 'Productos', key: 'products' },
+                    { title: 'total', key: 'total' },
+                    { title: '', key: 'data-table-expand' },
+                    
+                  ]"
+              :items="sales"
+              :search="search"
+              show-expand
+              class="elevation-1"
+            >
+              <template v-slot:top>
+                <v-toolbar flat>
+                  <v-toolbar-title>Ventas</v-toolbar-title>
+                </v-toolbar>
+              </template>
+              <template v-slot:expanded-row="{ columns, item }">
+                <tr>
+                  <td :colspan="1">
+                    
+                  </td>
+                  <td>
+                    Nombre del cliente: {{ getClient(item.columns.customerID).name }}
+                  </td>
+                  
+                  <td> Costo de produccion: {{ getSale(item.columns).totalProductionCost }}</td>
+                  <td>
+                    Profit: {{ item.columns.total - getSale(item.columns).totalProductionCost }}  
+                  </td>
+                  <td></td>
+                  <td>
+                  
+                  <v-icon
+                    size="small"
+                    @click="deleteSale(item.columns)"
+                  >
+                    mdi-delete
+                  </v-icon>
+                  </td>
+                </tr>
+                <v-dialog v-model="dialogDelete" max-width="500px">
+          <v-card>
+            <v-card-title class="text-h5">Are you sure you want to delete this item?</v-card-title>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="blue-darken-1" variant="text" @click="closeDelete">Cancel</v-btn>
+              <v-btn color="blue-darken-1" variant="text" @click="deleteItemConfirm">OK</v-btn>
+              <v-spacer></v-spacer>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+              </template>
+              
+                  
+                  
+            </v-data-table>
           </v-sheet>
         </v-col>
+        
       </v-row>
-    </v-container>
+      
+  
+   </v-container>
   </v-main>
 </template>
 
@@ -191,12 +260,14 @@ import { onBeforeMount } from "vue";
 import { ClientService } from "../services/ClientService.js";
 import { watch } from "vue";
 
+
+const search = new ref('');
 const products = new ref([]);
 const clients = new ref([]);
 const sales = new ref([]);
-
+const dialogDelete = new ref(false);
 const dialog = new ref(false);
-
+const expanded = new ref([]);
 
 const currentItem = new ref({
   id: 0,
@@ -238,6 +309,7 @@ const addNewProduct = () => {
     name : currentItem.value.name,
     quantity : currentQuantity.value,
     price: currentItem.value.price,
+    totalProductionCost: currentItem.value.productionCost.total ,
     total : currentTotal.value,  
   })
   updateTotal();
@@ -249,6 +321,17 @@ const addNewProduct = () => {
   //console.log(JSON.stringify(currentCart.value))
   }
   
+}
+
+const deleteSale = async (sale) => {
+  dialogDelete.value = true;
+  try{
+    const response = await SaleService.deleteSale(sale.id);
+    getSales();
+    console.log("Venta eliminada con exito");
+  }catch(error){
+    console.error("Error al eliminar la venta:", error);
+  } 
 }
 
 const updateSubTotal = () => {
@@ -263,7 +346,9 @@ const updateTotal = () => {
   })
 }
 
-
+const getClient = (customerID) => {
+  return clients.value.find(client => client.id == customerID);
+}
 
 const getProducts = async () => {
 	try {
@@ -273,7 +358,8 @@ const getProducts = async () => {
 	}
 };
 
-
+const getSale = (tempSale) =>{
+  return sales.value.find(sale => sale.id == tempSale.id)}
 
 const getSales = async () => {
 	try {
@@ -285,12 +371,7 @@ const getSales = async () => {
 const getClients = async () => {
 	try {
 		clients.value = await ClientService.getClients();
-    clients.value.append({
-      id: 0,
-      name: "Sin cliente",
-      address: "",
-      phone: "",
-    })
+    
 	} catch (error) {
 		console.error("Error al obtener los producto:", error);
 	}
@@ -342,10 +423,20 @@ const cartAdapter = (cart) => {
   return {
     customerID: cart.client,
     products: productsAdapter(cart.items),
+    totalProductionCost: calculateCost(cart.items),
     total: cart.total,
   } 
-
 }
+
+const calculateCost = (items) => {
+  let cost = 0;
+  items.forEach(item => {
+    cost += item.totalProductionCost * item.quantity;
+  })
+  return cost;
+}
+
+
 
 const productsAdapter = (products) => {
   let productsP = [];

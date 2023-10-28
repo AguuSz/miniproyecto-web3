@@ -171,7 +171,6 @@
 
 								{ title: 'Customer', key: 'customerID' },
 								{ title: 'Fecha', key: 'date' },
-								{ title: 'Productos', key: 'products' },
 								{ title: 'total', key: 'total' },
 								{ title: '', key: 'data-table-expand' },
 							]"
@@ -190,14 +189,10 @@
 								<tr>
 									<td :colspan="1"></td>
 									<td>
-										Nombre del cliente:
-										{{ getClient(item.columns.customerID).name }}
+										{{ (getClient(item.columns.customerID)).name }}
 									</td>
 
-									<td>
-										Costo de produccion:
-										{{ getSale(item.columns).totalProductionCost }}
-									</td>
+									
 									<td>
 										Profit:
 										{{
@@ -205,13 +200,65 @@
 											getSale(item.columns).totalProductionCost
 										}}
 									</td>
-									<td></td>
+									<td>
+										<u @click="productsDialog()" style="color:blue;">
+											Ver Productos
+										</u>
+									</td>
 									<td>
 										<v-icon size="small" @click="deleteSale(item.columns)">
 											mdi-delete
 										</v-icon>
 									</td>
 								</tr>
+								<v-dialog v-model="productsDialogStatus" max-width="500px">
+									<v-card>
+									<v-card-title>
+										<span class="headline">Productos</span>
+									</v-card-title>
+								
+									<v-card-text>
+										<v-table>
+											<thead>
+												<tr>
+													<th class="text-left">id</th>
+													<th class="text-left">Nombre</th>
+													<th>Cantidad</th>
+													<th>Precio</th>
+													<th>Total</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr v-for="item in getSale(item.columns).products" :key="item">
+													<td>{{ item.product }}</td>
+													<td>{{ (getProduct(item.product)).name }}</td>
+													<td>{{ item.quantity }}</td>
+													<td>{{ (getProduct(item.product)).price }}</td>
+													<td>{{ (getProduct(item.product)).price * item.quantity }}</td>
+												</tr>
+												<tr>
+													<td colspan="4"></td>
+													<td>
+														{{ getSale(item.columns).total }}
+															
+													</td>
+												</tr>
+											</tbody>
+										</v-table>
+
+									</v-card-text>
+									<v-card-actions>
+										<v-spacer></v-spacer>
+										<v-btn
+											color="blue-darken-1"
+											variant="text"
+											@click="productsDialogStatus = false"
+											>Volver a ventas</v-btn
+										>
+										<v-spacer></v-spacer>
+									</v-card-actions>
+								</v-card>
+								</v-dialog>
 								<v-dialog v-model="dialogDelete" max-width="500px">
 									<v-card>
 										<v-card-title>Confirmacion</v-card-title>
@@ -258,7 +305,7 @@ const sales = new ref([]);
 const dialogDelete = new ref(false);
 const dialog = new ref(false);
 const expanded = new ref([]);
-
+const productsDialogStatus = new ref(false)
 const currentItem = new ref({
 	id: 0,
 	name: "",
@@ -286,6 +333,10 @@ onBeforeMount(async () => {
 	await getClients();
 });
 
+const productsDialog = () => {
+	productsDialogStatus.value = true;
+};
+
 const addNewProduct = () => {
 	if (currentItem.value.id == 0) {
 		alert("Seleccione un producto");
@@ -305,7 +356,7 @@ const addNewProduct = () => {
 			name: "",
 			price: 0,
 		};
-		//console.log(JSON.stringify(currentCart.value))
+		
 	}
 };
 
@@ -331,9 +382,6 @@ const updateTotal = () => {
 	});
 };
 
-const getClient = (customerID) => {
-	return clients.value.find((client) => client.id == customerID);
-};
 
 const getProducts = async () => {
 	try {
@@ -346,21 +394,33 @@ const getProducts = async () => {
 const getSale = (tempSale) => {
 	return sales.value.find((sale) => sale.id == tempSale.id);
 };
+const getProduct = (tempProduct) => {
+	
+	return products.value.find((product) => product.id == tempProduct);
+};
 
 const getSales = async () => {
 	try {
 		sales.value = await SaleService.getSales();
 	} catch (error) {
-		console.error("Error al obtener los producto:", error);
+		console.error("Error al obtener las ventas:", error);
 	}
 };
 const getClients = async () => {
 	try {
 		clients.value = await ClientService.getClients();
 	} catch (error) {
-		console.error("Error al obtener los producto:", error);
+		console.error("Error al obtener los clientes:", error);
 	}
 };
+
+const getClient = (customerID) => {
+	if(typeof(customerID) != "number"){
+		console.log("No existe un cliente con ese numero");
+	}
+	return clients.value.find((client) => client.id == customerID);
+};
+
 
 const cancelSale = () => {
 	currentCart.value = {
@@ -379,11 +439,13 @@ const saveSale = async () => {
 	}
 	// Check si el cliente existe
 	if (!(currentCart.value.client in clients.value)) {
+		
 		alert("No hay cliente seleccionado");
 		return;
 	}
 	try {
 		let cart = cartAdapter(currentCart.value);
+		
 		console.log(JSON.stringify(cart));
 		const response = await SaleService.createSale(cart);
 		getSales();
@@ -400,12 +462,15 @@ const saveSale = async () => {
 	}
 };
 
+
+
 const cartAdapter = (cart) => {
 	return {
 		customerID: cart.client,
 		products: productsAdapter(cart.items),
 		totalProductionCost: calculateCost(cart.items),
 		total: cart.total,
+		date: new Date().toDateString()
 	};
 };
 
@@ -428,6 +493,7 @@ const productsAdapter = (products) => {
 
 	return productsP;
 };
+
 
 watch(currentQuantity, updateSubTotal);
 watch(currentItem, updateSubTotal);

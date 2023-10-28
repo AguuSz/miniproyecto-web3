@@ -201,9 +201,9 @@
 										}}
 									</td>
 									<td>
-										<u @click="productsDialog()" style="color:blue;">
+										<v-btn variant="tonal" @click="productsDialog()" color="primary">
 											Ver Productos
-										</u>
+										</v-btn>
 									</td>
 									<td>
 										<v-icon size="small" @click="deleteSale(item.columns)">
@@ -417,6 +417,7 @@ const getClients = async () => {
 const getClient = (customerID) => {
 	if(typeof(customerID) != "number"){
 		console.log("No existe un cliente con ese numero");
+		return false
 	}
 	return clients.value.find((client) => client.id == customerID);
 };
@@ -438,15 +439,13 @@ const saveSale = async () => {
 		return;
 	}
 	// Check si el cliente existe
-	if (!(currentCart.value.client in clients.value)) {
-		
+	if (!getClient(currentCart.value.client)) {
 		alert("No hay cliente seleccionado");
 		return;
 	}
 	try {
 		let cart = cartAdapter(currentCart.value);
 		
-		console.log(JSON.stringify(cart));
 		const response = await SaleService.createSale(cart);
 		getSales();
 		currentCart.value = {
